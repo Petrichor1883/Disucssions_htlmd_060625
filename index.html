@@ -136,8 +136,8 @@
    Remplacer les deux valeurs ci-dessous par celles
    trouvées dans Settings → API de votre projet.
 ═══════════════════════════════════════════════ */
-const SUPABASE_URL = 'VOTRE_PROJECT_URL';
-const SUPABASE_KEY = 'VOTRE_ANON_KEY';
+const SUPABASE_URL = 'https://cjagiesqdmwssqozcqck.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_u5mwVRsQksWoLeoV6ZGeXg_KJOk2bq1';
 /* ═══════════════════════════════════════════════ */
 
 const SK = 'sujets-ig-v2'; // clé localStorage (fallback si Supabase non configuré)
@@ -273,7 +273,7 @@ const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 async function load() {
   if (db) {
     try {
-      const { data } = await db.from('liste').select().eq('id', 1).maybeSingle();
+      const { data } = await db.from('Liste').select().eq('id', 1).maybeSingle();
       if (data?.data && Array.isArray(data.data) && data.data.length) subj = data.data;
       if (data?.subtitle) currentSubtitle = data.subtitle;
     } catch(e) { console.warn('Supabase load failed — using localStorage', e); }
@@ -290,7 +290,7 @@ async function load() {
 /* ── Save subjects ── */
 async function save() {
   if (db) {
-    try { await db.from('liste').upsert({ id: 1, data: subj, subtitle: currentSubtitle }); } catch(e) { console.warn('Supabase save failed', e); }
+    try { await db.from('Liste').upsert({ id: 1, data: subj, subtitle: currentSubtitle }); } catch(e) { console.warn('Supabase save failed', e); }
   } else {
     try { localStorage.setItem(SK, JSON.stringify(subj)); } catch {}
   }
@@ -300,7 +300,7 @@ async function save() {
 async function saveSub(text) {
   currentSubtitle = text;
   if (db) {
-    try { await db.from('liste').upsert({ id: 1, data: subj, subtitle: text }); } catch {}
+    try { await db.from('Liste').upsert({ id: 1, data: subj, subtitle: text }); } catch {}
   } else {
     try { localStorage.setItem(SK+'-sub', text); } catch {}
   }
