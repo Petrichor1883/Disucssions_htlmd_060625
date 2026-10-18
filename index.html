@@ -372,6 +372,8 @@ let view = 'home';
 let scope = 'all';
 let currentSubtitle = 'la liste interminable, dans le bon sens';
 let db = null;
+let noteEditId = null;      // sujet dont la note est en cours de saisie
+let pendingRender = false;  // rafraîchissement reporté pendant la saisie
 
 /* ── Supabase init ── */
 if (CONFIGURED) {
@@ -447,12 +449,36 @@ async function saveSub(text) {
 /* ── Real-time ── */
 function setupRealtime(){
   if(!db)return;
-  const h=p=>{if(!p.new?.data)return;subj=p.new.data;if(p.new?.subtitle)currentSubtitle=p.new.subtitle;render();if(callMode)renderCall();};
+  const h=p=>{
+    if(!p.new?.data)return;
+    let incoming=p.new.data;
+    // Une note est en cours de saisie : on garde la version locale (plus récente)
+    if(noteEditId!==null){
+      const loc=subj.find(s=>s.id===noteEditId);
+      if(loc) incoming=incoming.map(s=>s.id===noteEditId?{...s,notes:loc.notes}:s);
+    }
+    subj=incoming;
+    if(p.new?.subtitle)currentSubtitle=p.new.subtitle;
+    // Ne jamais redessiner sous les doigts : ça détruit le champ et ferme le clavier
+    if(isTyping()){pendingRender=true;return;}
+    render();if(callMode)renderCall();
+  };
   const conn=()=>{try{if(realtimeChannel)realtimeChannel.unsubscribe();realtimeChannel=db.channel('l-'+Date.now()).on('postgres_changes',{event:'*',schema:'public',table:'Liste'},h).subscribe();}catch(e){}};
   conn();
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&realtimeChannel?.state!=='joined')conn();});
   setInterval(()=>{if(db&&realtimeChannel?.state!=='joined')conn();},45000);
 }
+
+/* ── Saisie en cours ── */
+function isTyping(){
+  const a=document.activeElement;
+  return !!a && (a.tagName==='TEXTAREA' || a.tagName==='INPUT' || a.isContentEditable);
+}
+document.addEventListener('focusout',()=>{
+  setTimeout(()=>{
+    if(pendingRender && !isTyping()){ pendingRender=false; render(); if(callMode) renderCall(); }
+  },150);
+});
 
 /* ── Actions ── */
 function tgDone(id, ev) {
@@ -586,6 +612,7 @@ function callMarkDone() {
 }
 
 function renderCall() {
+  noteEditId = null;
   const overlay = document.getElementById('call-overlay');
   const pending = pendScope();
   if (!pending.length) { closeCallMode(); return; }
@@ -617,7 +644,7 @@ function renderCall() {
   </div>
   <div class="c-notes">
     <div class="c-notes-lbl"><i class="ti ti-notes" style="font-size:13px"></i> Notes</div>
-    <textarea class="c-notes-area" placeholder="Note sur ce sujet…" oninput="updateNote(${s.id},this.value)">${s.notes||''}</textarea>
+    <textarea class="c-notes-area" placeholder="Note sur ce sujet…" onfocus="noteEditId=${s.id}" onblur="flushNote(${s.id},this.value)" oninput="updateNote(${s.id},this.value)">${esc(s.notes||'')}</textarea>
   </div>
   <div class="c-nav">
     <button class="c-btn c-btn-ghost" onclick="callNav(-1)" ${!multi?'disabled':''}><i class="ti ti-arrow-left"></i></button>
@@ -720,6 +747,12 @@ function updateNote(id, text) {
   subj = subj.map(s => s.id === id ? {...s, notes: text} : s);
   clearTimeout(window._nst);
   window._nst = setTimeout(save, 900);
+}
+function flushNote(id, text) {
+  noteEditId = null;
+  clearTimeout(window._nst);
+  subj = subj.map(s => s.id === id ? {...s, notes: text} : s);
+  save();
 }
 
 /* ── Open call mode at specific subject ── */
@@ -850,15 +883,40 @@ function updateSticky() {
   ab.style.top = top+'px';
 }
 
+/* ── Corps de liste (réutilisé par la recherche) ── */
+function listBody() {
+  const _sq = searchQuery.toLowerCase().trim();
+  const _m = s => !_sq || s.text.toLowerCase().includes(_sq) || s.q?.some(q=>(q.t||'').toLowerCase().includes(_sq));
+  const scoped = scope !== 'all';
+  const catOk = s => scoped ? s.cat===scope : (filt==='all'||s.cat===filt);
+  const pend = subj.filter(s => !s.done && catOk(s) && _m(s));
+  const done = subj.filter(s =>  s.done && catOk(s) && _m(s));
+  const html = `
+  ${pend.map(s=>ri(s)).join('')}
+  ${!pend.length&&done.length?'<p class="emp">Tout est traité — bien joué.</p>':''}
+  ${!pend.length&&!done.length?(_sq?'<p class="emp">Aucun résultat.</p>':'<p class="emp">Liste vide pour l’instant.</p>'):''}
+  ${done.length?`<div><div class="ds-hd"><div class="dl"></div><span class="dlb"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px;margin-right:4px"></i>traités · ${done.length}</span><div class="dl"></div></div>${done.map(s=>ri(s)).join('')}</div>`:''}`;
+  return { pend, done, html };
+}
+
+/* ── Recherche : on ne touche qu'à la liste, le champ garde le focus ── */
+function onSearch(v) {
+  searchQuery = v;
+  const box = document.getElementById('list-body');
+  if (view !== 'list' || !box) { render(); return; }
+  const lb = listBody();
+  box.innerHTML = lb.html;
+  const cn = document.querySelector('.hd .cn');
+  if (cn) cn.textContent = lb.pend.length;
+}
+
 /* ── Main render ── */
 function render() {
   const sy = window.scrollY;
-  const _sq = searchQuery.toLowerCase().trim();
-  const _m = s => !_sq || s.text.toLowerCase().includes(_sq) || s.q?.some(q=>q.t.toLowerCase().includes(_sq));
   const newCount = subj.filter(s => (s.id||0) > lastSeen).length;
   const totalRem = subj.filter(s => !s.done).length;
   const bell = `<button class="bell-btn" onclick="seeNew()" title="Nouveautés" ${newCount===0?'data-empty="1"':''}><i class="ti ti-bell"></i>${newCount>0?`<span class="bell-badge">${newCount>99?'99+':newCount}</span>`:''}</button>`;
-  const searchBar = searchOpen ? '<div class="search-bar"><i class="ti ti-search" style="color:var(--text3);font-size:16px;flex-shrink:0"></i><input id="sq" type="search" placeholder="Chercher…" value="' + esc(searchQuery) + '" oninput="searchQuery=this.value;render()" autocomplete="off"/><button onclick="searchQuery=\'\';searchOpen=false;render()"><i class="ti ti-x"></i></button></div>' : '';
+  const searchBar = searchOpen ? '<div class="search-bar"><i class="ti ti-search" style="color:var(--text3);font-size:16px;flex-shrink:0"></i><input id="sq" type="search" placeholder="Chercher…" value="' + esc(searchQuery) + '" oninput="onSearch(this.value)" autocomplete="off"/><button onclick="searchQuery=\'\';searchOpen=false;render()"><i class="ti ti-x"></i></button></div>' : '';
 
   let html;
   if (view === 'home') {
@@ -897,9 +955,8 @@ ${searchBar}
   } else {
     const scoped = scope !== 'all';
     const head = scoped ? (CM[scope] || CM.chitchat) : null;
-    const catOk = s => scoped ? s.cat===scope : (filt==='all'||s.cat===filt);
-    const pend = subj.filter(s => !s.done && catOk(s) && _m(s));
-    const done = subj.filter(s =>  s.done && catOk(s) && _m(s));
+    const lb = listBody();
+    const pend = lb.pend;
     const FKEYS = ['all', ...Object.keys(CM)];
     const FLAB  = ['tous', ...Object.values(CM).map(v=>v.l)];
     const addBar = formExpanded ? `
@@ -947,12 +1004,7 @@ ${searchBar}
 </div>
 ${addBar}
 </div>
-<div>
-  ${pend.map(s=>ri(s)).join('')}
-  ${!pend.length&&done.length?'<p class="emp">Tout est traité — bien joué.</p>':''}
-  ${!pend.length&&!done.length?'<p class="emp">Liste vide pour l’instant.</p>':''}
-  ${done.length?`<div><div class="ds-hd"><div class="dl"></div><span class="dlb"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px;margin-right:4px"></i>traités · ${done.length}</span><div class="dl"></div></div>${done.map(s=>ri(s)).join('')}</div>`:''}
-</div>
+<div id="list-body">${lb.html}</div>
 <div class="bottom"></div>`;
   }
 
