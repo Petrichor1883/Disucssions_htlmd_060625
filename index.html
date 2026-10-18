@@ -269,7 +269,7 @@
     .fb{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 15px;border:none;border-radius:var(--r-pill);box-shadow:inset 0 0 0 1px var(--line-strong);background:transparent;color:var(--ink-2);font-size:14px;font-weight:700;line-height:1;white-space:nowrap;cursor:pointer;flex-shrink:0;transition:background .15s,color .15s}
     .fb:active{background:var(--surface-2)}
     .fb.fa{background:var(--ink);color:var(--page);box-shadow:none;font-weight:800}
-    .surprise-btn{padding:0 14px 0 12px;box-shadow:inset 0 0 0 1px var(--gold);color:var(--gold-ink);font-weight:800}
+    .surprise-btn{padding:0 14px 0 12px;box-shadow:none;border:1px solid var(--gold);color:var(--gold-ink);font-weight:800}
     .surprise-btn:active{background:var(--gold-soft)}
 
     /* ── Barre d'ajout (liseré d'encre) ── */
@@ -445,8 +445,7 @@
     .emp-p{max-width:290px;margin-top:10px;font-size:var(--fs-small);line-height:1.5;color:var(--ink-2);text-wrap:pretty}
 
     /* ── Couverture du grimoire ── */
-    #cover{position:fixed;inset:0;z-index:500;overflow:hidden;cursor:pointer;outline:none;background-color:#2E1840;background-image:var(--grain),repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(0,0,0,.06) 0 1px,transparent 1px 3px),radial-gradient(120% 80% at 62% 34%,#51306A 0%,#3A2050 45%,#24122F 100%);transition:opacity .45s ease}
-    #cover.opening{opacity:0;pointer-events:none}
+    #cover{position:fixed;inset:0;z-index:500;overflow:hidden;cursor:pointer;outline:none;background-color:#2E1840;background-image:var(--grain),repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(0,0,0,.06) 0 1px,transparent 1px 3px),radial-gradient(120% 80% at 62% 34%,#51306A 0%,#3A2050 45%,#24122F 100%)}
     .cv-spine{position:absolute;left:0;top:0;bottom:0;width:26px;background:linear-gradient(90deg,#160A20 0%,#2C1640 45%,#3E2354 75%,#1A0C24 100%);box-shadow:2px 0 8px rgba(0,0,0,.55)}
     .cv-band{position:absolute;left:0;width:26px;height:5px;border-top:1px solid #C99A45;border-bottom:1px solid #C99A45;opacity:.85}
     .cv-stage{position:absolute;left:50%;top:50%;width:390px;height:844px;transform:translate(-50%,-50%) scale(var(--cs,1))}
@@ -471,10 +470,53 @@
     .cv-tome span{transform:rotate(-45deg);font-family:var(--font-display);font-size:24px;font-weight:600;line-height:1;color:#EBC679}
     .cv-hint{top:704px;left:26px;right:0;text-align:center;font-family:var(--font-display);font-size:16px;font-style:italic;font-weight:600;line-height:1;color:#EBC679}
     .cv-glare{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.05) 46%,transparent 60%)}
+
+    /* ═══ ANIMATIONS (étape 4) ═══ */
+    /* Lueur de bougie */
+    .home-all{animation:li-flicker 3.2s ease-in-out infinite}
+    .surprise-btn{animation:li-flicker 2.8s ease-in-out infinite}
+    .bell-badge{animation:li-flicker 2.8s ease-in-out infinite}
+    /* Anneaux magiques : un tour en 120 s (60 s pour l'en-tête), calés sur une horloge commune */
+    .mc-ring{animation:li-spin 120s linear infinite;animation-delay:calc(var(--spin-t,0) * -1s)}
+    .lh-ring{animation:li-spin 60s linear infinite;animation-delay:calc(var(--spin-t,0) * -1s)}
+    .cv-ring{animation:li-spin 120s linear infinite}
+    /* Étoiles, fantômes, dorure */
+    .constel .tw,.emp-sky .tw{animation:li-twinkle var(--d,4s) ease-in-out var(--dl,0s) infinite}
+    .emp-ghost{animation:li-float 4s ease-in-out infinite}
+    .cv-ghost{animation:li-float 3.2s ease-in-out infinite}
+    .cv-t1,.cv-t2{animation:li-sheen 7s ease-in-out infinite}
+    .cv-hint{animation:li-twinkle 2.6s ease-in-out infinite}
+    /* Étincelles de la case « traité » */
+    .spark{position:absolute;left:50%;top:50%;pointer-events:none;background:var(--gold);-webkit-clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%)}
+    .itm.leaving .ic,.itm.leaving .xb{opacity:.55;transition:opacity .5s .25s}
+    /* Braises et feux follets */
+    #embers{position:fixed;bottom:0;left:max(0px,calc(50% - 260px));width:min(520px,100%);height:420px;overflow:hidden;pointer-events:none;z-index:-1}
+    .ember{position:absolute;bottom:-6px;border-radius:50%;box-shadow:0 0 6px rgba(255,140,60,.85);opacity:0;pointer-events:none}
+    .wisp{position:absolute;width:9px;height:9px;border-radius:50%;background:rgba(120,210,200,.55);box-shadow:0 0 14px 4px rgba(69,168,160,.55);filter:blur(1.5px);opacity:0;pointer-events:none}
+    /* Livre : feuilles qui tournent (couverture, accueil) */
+    #cover{background:none;perspective:1700px;perspective-origin:0% 50%}
+    .cv-leaf{position:absolute;inset:0;transform-origin:0 50%;transform-style:preserve-3d;-webkit-transform-style:preserve-3d}
+    .cv-face{position:absolute;inset:0;overflow:hidden;-webkit-backface-visibility:hidden;backface-visibility:hidden}
+    .cv-front{background-color:#2E1840;background-image:var(--grain),repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(0,0,0,.06) 0 1px,transparent 1px 3px),radial-gradient(120% 80% at 62% 34%,#51306A 0%,#3A2050 45%,#24122F 100%)}
+    .cv-back{transform:rotateY(180deg);background-color:#2A163A;background-image:var(--grain),radial-gradient(90% 60% at 40% 40%,#3B2150,#21102D)}
+    .cv-dim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(270deg,rgba(0,0,0,.7),rgba(0,0,0,.15) 80%);opacity:0}
+    .book,.under,.shade-app{position:fixed;top:0;bottom:0;left:max(0px,calc(50% - 260px));width:min(520px,100%);pointer-events:none}
+    .book{z-index:220;perspective:1700px;perspective-origin:0% 50%}
+    .under{z-index:210;overflow:hidden}
+    .leaf{position:absolute;inset:0;transform-origin:0 50%;transform-style:preserve-3d;-webkit-transform-style:preserve-3d}
+    .face{position:absolute;inset:0;overflow:hidden;-webkit-backface-visibility:hidden;backface-visibility:hidden;background-color:var(--page);background-image:var(--page-edge),var(--gutter),var(--grain),var(--hearth);background-size:5px 100%,auto,auto,auto;background-position:right top,0 0,0 0,0 0;background-repeat:no-repeat,no-repeat,repeat,no-repeat}
+    .face.back{transform:rotateY(180deg);background-image:linear-gradient(270deg,rgba(0,0,0,.55) 0,rgba(0,0,0,.18) 10px,rgba(0,0,0,0) 34px),var(--grain);background-size:auto,auto;background-position:0 0,0 0;background-repeat:no-repeat,repeat}
+    .face-in{position:absolute;left:0;right:0;top:0}
+    .face-dim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(270deg,rgba(0,0,0,.6),rgba(0,0,0,.1) 80%);opacity:0}
+    .shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.75),rgba(0,0,0,.25) 70%,rgba(0,0,0,.1));opacity:0}
+    .shade-app{position:fixed;z-index:210}
+    .verso-c{position:absolute;left:50%;top:50%;margin:-100px 0 0 -100px;opacity:.12;color:var(--gold-ink)}
   </style>
 </head>
 <body>
 <div id="cover" role="button" tabindex="0" aria-label="Ouvrir le grimoire">
+<div class="cv-leaf">
+<div class="cv-face cv-front">
   <div class="cv-spine"></div>
   <div class="cv-band" style="top:96px"></div>
   <div class="cv-band" style="bottom:96px"></div>
@@ -505,6 +547,10 @@
     <div class="cv-bottom"><i></i>Carnet des promesses<i></i></div>
   </div>
   <div class="cv-glare"></div>
+  <div class="cv-dim"></div>
+</div>
+<div class="cv-face cv-back"></div>
+</div>
 </div>
 <div id="app"><p style="padding:2rem;text-align:center;color:var(--ink-3)">Chargement…</p></div>
 <div id="call-overlay"></div>
@@ -830,7 +876,10 @@ function tgDone(id, ev) {
     clearTimeout(window._undoTimer);
     undoState = null;
   }
-  save(); render();
+  save();
+  clearTimeout(window._doneT);
+  if (wasUndone && animateDone(id)) { updateToast(); window._doneT = setTimeout(render, 1150); }
+  else render();
 }
 
 function undoDone() {
@@ -887,9 +936,9 @@ function migrate() {
 }
 /* ── Navigation accueil / listes ── */
 function pendScope() { return subj.filter(s => !s.done && (scope === 'all' || s.cat === scope)); }
-function openList(k) { scope = k; filt = 'all'; exp = null; searchOpen = false; searchQuery = ''; view = 'list'; window.scrollTo(0,0); render(); }
-function goHome() { view = 'home'; scope = 'all'; filt = 'all'; exp = null; searchOpen = false; searchQuery = ''; window.scrollTo(0,0); render(); }
-function homeSearch() { scope = 'all'; filt = 'all'; view = 'list'; searchOpen = true; searchQuery = ''; window.scrollTo(0,0); render(); setTimeout(() => document.getElementById('sq')?.focus(), 50); }
+function openList(k) { if (turning) return; const snap = view === 'home' ? snapPage() : null; scope = k; filt = 'all'; exp = null; searchOpen = false; searchQuery = ''; view = 'list'; window.scrollTo(0,0); render(); turnAway(snap); }
+function goHome() { if (turning) return; const snap = view === 'list' ? snapPage() : null; view = 'home'; scope = 'all'; filt = 'all'; exp = null; searchOpen = false; searchQuery = ''; window.scrollTo(0,0); render(); turnBack(snap); }
+function homeSearch() { if (turning) return; const snap = view === 'home' ? snapPage() : null; scope = 'all'; filt = 'all'; view = 'list'; searchOpen = true; searchQuery = ''; window.scrollTo(0,0); render(); turnAway(snap); setTimeout(() => document.getElementById('sq')?.focus(), 50); }
 function addS() {
   const inp = document.getElementById('ns');
   const t = inp.value.trim(); if (!t) return;
@@ -1256,6 +1305,7 @@ function onSearch(v) {
 /* ── Main render ── */
 function render() {
   const sy = window.scrollY;
+  document.documentElement.style.setProperty('--spin-t', ((Date.now() / 1000) % 120).toFixed(2));
   const newCount = subj.filter(s => (s.id||0) > lastSeen).length;
   const totalRem = subj.filter(s => !s.done).length;
   const bell = `<button class="bell-btn" onclick="seeNew()" title="Nouveautés" aria-label="Nouveautés" ${newCount===0?'data-empty="1"':''}>${ic('bell')}${newCount>0?`<span class="bell-badge">${newCount>99?'99+':newCount}</span>`:''}</button>`;
@@ -1436,6 +1486,174 @@ async function doLogout() {
   if (realtimeChannel) { try { realtimeChannel.unsubscribe(); } catch {} realtimeChannel = null; }
   renderLogin('Déconnecté.');
 }
+/* ═══ Animations : livre, braises, étincelles ═══
+   Tout passe par la Web Animations API et s'arrête si « Réduire les animations » est activé. */
+const RM_QUERY = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+function reducedMotion() { return !!(RM_QUERY && RM_QUERY.matches) || !Element.prototype.animate; }
+const EASE_PAGE = 'cubic-bezier(.6,.04,.3,1)', EASE_COVER = 'cubic-bezier(.55,.05,.25,1)';
+const ROT = d => `rotateY(${d}deg)`;
+let turning = false;
+
+/* Instantané visuel de la page affichée (sans identifiants ni champs actifs) */
+function snapPage() {
+  const app = document.getElementById('app');
+  if (reducedMotion() || !app || !app.firstElementChild) return null;
+  const y = window.scrollY;
+  const c = app.cloneNode(true);
+  c.removeAttribute('id');
+  c.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
+  c.querySelectorAll('[contenteditable]').forEach(e => e.removeAttribute('contenteditable'));
+  const ct = c.querySelector('.controls-top');
+  if (ct && y > 0) ct.style.transform = `translateY(${y}px)`;
+  return { node: c, y };
+}
+function makeFace(snap, cls) {
+  const f = document.createElement('div');
+  f.className = 'face ' + cls;
+  if (snap) {
+    const inner = document.createElement('div');
+    inner.className = 'face-in';
+    inner.style.transform = `translateY(${-snap.y}px)`;
+    inner.appendChild(snap.node);
+    f.appendChild(inner);
+  }
+  return f;
+}
+const VERSO = '<svg class="verso-c" width="200" height="200" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96" fill="none" stroke="currentColor" stroke-width="1"/><circle cx="100" cy="100" r="84" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="1 7"/><circle cx="100" cy="100" r="66" fill="none" stroke="currentColor" stroke-width="1"/></svg>';
+function makeLeaf(snap) {
+  const book = document.createElement('div');
+  book.className = 'book';
+  book.setAttribute('aria-hidden', 'true');
+  const leaf = document.createElement('div');
+  leaf.className = 'leaf';
+  const front = makeFace(snap, 'front');
+  const dim = document.createElement('div');
+  dim.className = 'face-dim';
+  front.appendChild(dim);
+  const back = makeFace(null, 'back');
+  back.innerHTML = VERSO;
+  leaf.append(front, back);
+  book.appendChild(leaf);
+  document.body.appendChild(book);
+  return { book, leaf, dim };
+}
+function shadeApp(dur, z) {
+  const sh = document.createElement('div');
+  sh.className = 'shade shade-app';
+  if (z) sh.style.zIndex = z;
+  document.body.appendChild(sh);
+  const a = sh.animate([{ opacity: .8 }, { opacity: 0 }], { duration: dur, easing: 'cubic-bezier(.5,0,.3,1)', fill: 'forwards' });
+  a.onfinish = () => sh.remove();
+  setTimeout(() => sh.remove(), dur + 400);
+}
+/* Ouvrir une liste : la page d'accueil se tourne vers la gauche */
+function turnAway(snap) {
+  if (!snap) return;
+  turning = true;
+  const { book, leaf, dim } = makeLeaf(snap);
+  shadeApp(1000);
+  const a = leaf.animate([{ transform: ROT(0) }, { transform: ROT(-180) }], { duration: 950, easing: EASE_PAGE, fill: 'forwards' });
+  dim.animate([{ opacity: 0 }, { opacity: .65 }], { duration: 950, easing: EASE_PAGE, fill: 'forwards' });
+  let done = false;
+  const end = () => { if (done) return; done = true; book.remove(); turning = false; };
+  a.onfinish = end;
+  setTimeout(end, 1500);
+}
+/* Retour à l'accueil : la page revient par-dessus la liste */
+function turnBack(listSnap) {
+  if (!listSnap) return;
+  const homeSnap = snapPage();
+  if (!homeSnap) return;
+  turning = true;
+  const under = document.createElement('div');
+  under.className = 'under';
+  under.setAttribute('aria-hidden', 'true');
+  const uf = makeFace(listSnap, 'front');
+  const ush = document.createElement('div');
+  ush.className = 'shade';
+  uf.appendChild(ush);
+  under.appendChild(uf);
+  document.body.appendChild(under);
+  const { book, leaf, dim } = makeLeaf(homeSnap);
+  leaf.style.transform = ROT(-180);
+  const a = leaf.animate([{ transform: ROT(-180) }, { transform: ROT(0) }], { duration: 950, easing: EASE_PAGE, fill: 'forwards' });
+  dim.animate([{ opacity: .65 }, { opacity: 0 }], { duration: 950, easing: EASE_PAGE, fill: 'forwards' });
+  ush.animate([{ opacity: 0 }, { opacity: .6 }], { duration: 950, easing: EASE_PAGE, fill: 'forwards' });
+  let done = false;
+  const end = () => { if (done) return; done = true; book.remove(); under.remove(); turning = false; };
+  a.onfinish = end;
+  setTimeout(end, 1500);
+}
+
+/* Case « traité » : l'étoile s'allume sur place, quatre étincelles, puis la liste se met à jour */
+function sparkle(ck) {
+  [[-17, -15, 0], [18, -10, 90], [12, 17, 180], [-15, 13, 260]].forEach(([x, y, d], i) => {
+    const z = i % 2 ? 7 : 9;
+    const s = document.createElement('span');
+    s.className = 'spark';
+    s.style.cssText = `width:${z}px;height:${z}px;margin:${-z / 2}px 0 0 ${-z / 2}px`;
+    ck.appendChild(s);
+    const a = s.animate([
+      { transform: `translate(${x * .4}px,${y * .4}px) scale(0) rotate(0deg)`, opacity: 0 },
+      { transform: `translate(${x}px,${y}px) scale(1) rotate(45deg)`, opacity: 1, offset: .4 },
+      { transform: `translate(${x * 1.1}px,${y * 1.1}px) scale(0) rotate(90deg)`, opacity: 0 },
+    ], { duration: 800, delay: 150 + d, easing: 'ease-out', fill: 'backwards' });
+    a.onfinish = () => s.remove();
+  });
+}
+function animateDone(id) {
+  if (reducedMotion()) return false;
+  const ck = document.querySelector('#itm-' + id + ' .ck');
+  if (!ck || ck.classList.contains('cd')) return false;
+  ck.classList.add('cd');
+  ck.setAttribute('aria-checked', 'true');
+  ck.closest('.itm')?.classList.add('leaving');
+  sparkle(ck);
+  return true;
+}
+
+/* Braises et feux follets (18 éléments animés au maximum) */
+let emberAnims = [];
+function lightEmbers() {
+  if (reducedMotion() || document.getElementById('embers')) return;
+  const host = document.createElement('div');
+  host.id = 'embers';
+  host.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(host);
+  const H = 420;
+  for (let k = 0; k < 16; k++) {
+    const z = 1.5 + Math.random() * 2.5;
+    const s = document.createElement('span');
+    s.className = 'ember';
+    s.style.cssText = `left:${Math.random() * 100}%;width:${z}px;height:${z}px;background:${Math.random() < .7 ? '#FFB066' : '#FF8A4C'}`;
+    host.appendChild(s);
+    const dx = (Math.random() - .5) * 70, rise = H * (.5 + Math.random() * .5);
+    emberAnims.push(s.animate([
+      { transform: 'translate(0,0)', opacity: 0 },
+      { transform: `translate(${dx * .3}px,${-rise * .2}px)`, opacity: .9, offset: .15 },
+      { transform: `translate(${-dx * .2}px,${-rise * .6}px)`, opacity: .54, offset: .6 },
+      { transform: `translate(${dx}px,${-rise}px)`, opacity: 0 },
+    ], { duration: 5500 + Math.random() * 5000, delay: -Math.random() * 9000, iterations: Infinity }));
+  }
+  for (let k = 0; k < 2; k++) {
+    const s = document.createElement('span');
+    s.className = 'wisp';
+    s.style.cssText = `left:${15 + k * 55}%;bottom:${60 + k * 90}px`;
+    host.appendChild(s);
+    emberAnims.push(s.animate([
+      { transform: 'translate(0,0)', opacity: 0 },
+      { transform: 'translate(40px,-30px)', opacity: .8, offset: .25 },
+      { transform: 'translate(90px,-10px)', opacity: .35, offset: .5 },
+      { transform: 'translate(60px,-70px)', opacity: .7, offset: .75 },
+      { transform: 'translate(10px,-50px)', opacity: 0 },
+    ], { duration: 16000 + k * 4000, delay: -k * 7000, iterations: Infinity, easing: 'ease-in-out' }));
+  }
+  document.addEventListener('visibilitychange', () => {
+    emberAnims.forEach(a => { try { document.hidden ? a.pause() : a.play(); } catch (e) {} });
+  });
+}
+lightEmbers();
+
 /* ── Couverture du grimoire : s'ouvre seule après 2,8 s ou au toucher ── */
 function fitCover() {
   const c = document.getElementById('cover');
@@ -1446,8 +1664,16 @@ function openCover() {
   if (!c || c.dataset.open) return;
   c.dataset.open = '1';
   clearTimeout(window._coverT);
-  c.classList.add('opening');
-  setTimeout(() => c.remove(), 460);
+  const leaf = c.querySelector('.cv-leaf');
+  if (reducedMotion() || !leaf) { c.remove(); return; }
+  c.style.pointerEvents = 'none';
+  const a = leaf.animate([{ transform: ROT(0) }, { transform: ROT(-180) }], { duration: 1400, easing: EASE_COVER, fill: 'forwards' });
+  c.querySelector('.cv-dim')?.animate([{ opacity: 0 }, { opacity: .7 }], { duration: 1400, easing: EASE_COVER, fill: 'forwards' });
+  shadeApp(1400);
+  let done = false;
+  const end = () => { if (done) return; done = true; c.remove(); };
+  a.onfinish = end;
+  setTimeout(end, 2000);
 }
 (function initCover() {
   const c = document.getElementById('cover');
